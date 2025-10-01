@@ -1,0 +1,418 @@
+
+import React, { useState } from 'react';
+import { Sparkles, CreditCard, Zap, TrendingUp, Gift, Settings, User, MessageCircle, Trophy, DollarSign, Star } from 'lucide-react';
+
+export default function SreeniApp() {
+  const [screen, setScreen] = useState('welcome');
+  const [userName, setUserName] = useState('');
+  const [inputName, setInputName] = useState('');
+  const [playerCardConnected, setPlayerCardConnected] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [inputMessage, setInputMessage] = useState('');
+  const [onboardingStep, setOnboardingStep] = useState(0);
+  const [preferences, setPreferences] = useState({
+    favoriteGames: [],
+    budget: '',
+    notifications: true
+  });
+
+  const sreeniPersonality = {
+    greeting: "Hey there, lucky player! 🎰",
+    tone: "friendly, enthusiastic, knowledgeable",
+    catchphrases: [
+      "Let's spin some magic together!",
+      "Your luck is about to level up!",
+      "Time to chase those jackpots!",
+      "Every spin is a new opportunity!"
+    ]
+  };
+
+  const onboardingSteps = [
+    {
+      question: "First things first - what should I call you?",
+      type: "text",
+      field: "name"
+    },
+    {
+      question: "What kind of slots get your heart racing?",
+      type: "multi-select",
+      options: ["Classic Slots", "Video Slots", "Progressive Jackpots", "Megaways", "Bonus Games"],
+      field: "favoriteGames"
+    },
+    {
+      question: "Let's keep things fun! What's your comfortable play budget?",
+      type: "select",
+      options: ["$20-$50", "$50-$100", "$100-$250", "$250-$500", "$500+"],
+      field: "budget"
+    }
+  ];
+
+  const handleStartOnboarding = () => {
+    setScreen('onboarding');
+  };
+
+  const handleOnboardingNext = (value) => {
+    const currentStep = onboardingSteps[onboardingStep];
+    
+    if (currentStep.field === 'name') {
+      setUserName(value);
+    } else {
+      setPreferences(prev => ({...prev, [currentStep.field]: value}));
+    }
+
+    if (onboardingStep < onboardingSteps.length - 1) {
+      setOnboardingStep(onboardingStep + 1);
+    } else {
+      setScreen('connect-card');
+    }
+  };
+
+  const handleConnectCard = () => {
+    setPlayerCardConnected(true);
+    setScreen('dashboard');
+    setMessages([
+      {
+        sender: 'sreeni',
+        text: `Awesome, ${userName}! Your player card is connected. I'm now synced with your casino account and ready to help you maximize your play! 🎉`
+      }
+    ]);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return;
+
+    const newMessages = [...messages, { sender: 'user', text: inputMessage }];
+    setMessages(newMessages);
+
+    setTimeout(() => {
+      const responses = [
+        `Great question, ${userName}! Based on your play history, I'd recommend trying the new Megaways slots - they're hot right now! 🔥`,
+        `Your player points are looking good! You're just 150 points away from earning a free buffet! 🍽️`,
+        `I noticed the progressive jackpot on "Fortune's Wheel" just hit $2.3M! Want me to guide you there? 💰`,
+        `Based on your budget preferences, I'd suggest the penny slots in the VIP area - lower variance, longer play time! 🎰`
+      ];
+      
+      setMessages([...newMessages, {
+        sender: 'sreeni',
+        text: responses[Math.floor(Math.random() * responses.length)]
+      }]);
+    }, 1000);
+
+    setInputMessage('');
+  };
+
+  // Welcome Screen
+  if (screen === 'welcome') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="text-center mb-8">
+            <div className="inline-block p-4 bg-white/10 rounded-full mb-4 backdrop-blur-sm">
+              <Sparkles size={48} className="text-yellow-300" />
+            </div>
+            <h1 className="text-4xl font-bold text-white mb-2">SlotGenie</h1>
+            <p className="text-purple-200 text-lg">Meet Sreeni, Your Personal Casino Companion</p>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 mb-6 border border-white/20">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Zap size={24} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white font-medium mb-1">Hey there, future winner!</p>
+                <p className="text-purple-100 text-sm">I'm Sreeni, your AI-powered slot companion. I'll help you find the best machines, track your play, and maximize your fun on the casino floor!</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3 mb-6">
+            {[
+              { icon: CreditCard, text: "Connect your player's card" },
+              { icon: TrendingUp, text: "Get real-time slot recommendations" },
+              { icon: Gift, text: "Track rewards & promotions" },
+              { icon: Trophy, text: "Maximize your winning potential" }
+            ].map((item, i) => (
+              <div key={i} className="flex items-center gap-3 text-white">
+                <item.icon size={20} className="text-yellow-300" />
+                <span className="text-sm">{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={handleStartOnboarding}
+            className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-bold py-4 rounded-2xl hover:shadow-lg hover:shadow-yellow-500/50 transition-all"
+          >
+            Get Started with Sreeni
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Onboarding Screen
+  if (screen === 'onboarding') {
+    const currentStep = onboardingSteps[onboardingStep];
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="mb-6">
+            <div className="flex gap-2 mb-4">
+              {onboardingSteps.map((_, i) => (
+                <div 
+                  key={i}
+                  className={`h-1 flex-1 rounded-full ${i <= onboardingStep ? 'bg-yellow-400' : 'bg-white/20'}`}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20">
+            <div className="flex items-start gap-3 mb-6">
+              <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <Zap size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-white font-medium">{currentStep.question}</p>
+              </div>
+            </div>
+
+            {currentStep.type === 'text' && (
+              <div>
+                <input
+                  type="text"
+                  value={inputName}
+                  onChange={(e) => setInputName(e.target.value)}
+                  placeholder="Enter your name"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-4 py-3 text-white placeholder-purple-300 mb-4"
+                />
+                <button
+                  onClick={() => handleOnboardingNext(inputName)}
+                  disabled={!inputName.trim()}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-bold py-3 rounded-xl disabled:opacity-50"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {currentStep.type === 'multi-select' && (
+              <div className="space-y-3">
+                {currentStep.options.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => {
+                      const current = preferences.favoriteGames;
+                      const updated = current.includes(option)
+                        ? current.filter(g => g !== option)
+                        : [...current, option];
+                      setPreferences({...preferences, favoriteGames: updated});
+                    }}
+                    className={`w-full p-3 rounded-xl border-2 transition-all ${
+                      preferences.favoriteGames.includes(option)
+                        ? 'border-yellow-400 bg-yellow-400/20 text-white'
+                        : 'border-white/20 bg-white/5 text-purple-100'
+                    }`}
+                  >
+                    {option}
+                  </button>
+                ))}
+                <button
+                  onClick={() => handleOnboardingNext(preferences.favoriteGames)}
+                  disabled={preferences.favoriteGames.length === 0}
+                  className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-bold py-3 rounded-xl disabled:opacity-50 mt-4"
+                >
+                  Continue
+                </button>
+              </div>
+            )}
+
+            {currentStep.type === 'select' && (
+              <div className="space-y-3">
+                {currentStep.options.map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => handleOnboardingNext(option)}
+                    className="w-full p-3 rounded-xl border-2 border-white/20 bg-white/5 text-purple-100 hover:border-yellow-400 hover:bg-yellow-400/20 transition-all"
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Connect Card Screen
+  if (screen === 'connect-card') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full">
+          <div className="bg-white/10 backdrop-blur-md rounded-3xl p-6 border border-white/20 text-center">
+            <div className="w-20 h-20 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <CreditCard size={40} className="text-white" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-white mb-2">Connect Your Player Card</h2>
+            <p className="text-purple-200 mb-6">Link your casino player's card to unlock Sreeni's full potential!</p>
+
+            <div className="bg-white/5 rounded-2xl p-4 mb-6 text-left">
+              <p className="text-white text-sm mb-3 font-medium">What you'll get:</p>
+              <div className="space-y-2">
+                {[
+                  "Real-time slot machine recommendations",
+                  "Track your rewards and comp points",
+                  "Personalized promotions and bonuses",
+                  "Live jackpot alerts",
+                  "Session tracking and analytics"
+                ].map((feature, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Star size={16} className="text-yellow-400" />
+                    <span className="text-purple-100 text-sm">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={handleConnectCard}
+              className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-bold py-4 rounded-2xl mb-3"
+            >
+              Connect Player Card
+            </button>
+            
+            <button
+              onClick={() => setScreen('dashboard')}
+              className="text-purple-200 text-sm"
+            >
+              Skip for now
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Dashboard Screen
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900">
+      {/* Header */}
+      <div className="bg-white/10 backdrop-blur-md border-b border-white/20 p-4">
+        <div className="flex items-center justify-between max-w-4xl mx-auto">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
+              <Sparkles size={20} className="text-white" />
+            </div>
+            <div>
+              <p className="text-white font-bold">Hey, {userName || 'Player'}!</p>
+              <p className="text-purple-200 text-xs">Ready to win big?</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button className="p-2 bg-white/10 rounded-lg">
+              <Settings size={20} className="text-white" />
+            </button>
+            <button className="p-2 bg-white/10 rounded-lg">
+              <User size={20} className="text-white" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="max-w-4xl mx-auto p-4">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Trophy size={16} className="text-yellow-400" />
+              <span className="text-purple-200 text-xs">Comp Points</span>
+            </div>
+            <p className="text-2xl font-bold text-white">2,847</p>
+            <p className="text-xs text-green-400">+150 today</p>
+          </div>
+          
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/20">
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign size={16} className="text-yellow-400" />
+              <span className="text-purple-200 text-xs">Session</span>
+            </div>
+            <p className="text-2xl font-bold text-white">$247</p>
+            <p className="text-xs text-green-400">+$47 profit</p>
+          </div>
+        </div>
+
+        {/* Sreeni Recommendations */}
+        <div className="bg-gradient-to-r from-yellow-400/20 to-orange-500/20 backdrop-blur-md rounded-2xl p-4 border border-yellow-400/30 mb-4">
+          <div className="flex items-start gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
+              <Zap size={20} className="text-white" />
+            </div>
+            <div className="flex-1">
+              <p className="text-white font-bold mb-1">Sreeni's Hot Pick 🔥</p>
+              <p className="text-purple-100 text-sm mb-3">
+                "Fortune's Quest" on the main floor is paying out 15% above average right now! RTP is peaking at 97.2%. Want me to guide you there?
+              </p>
+              <button className="bg-white text-purple-900 text-sm font-bold px-4 py-2 rounded-lg">
+                Take Me There
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Chat Section */}
+        <div className="bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 overflow-hidden">
+          <div className="bg-white/5 p-3 border-b border-white/10">
+            <div className="flex items-center gap-2">
+              <MessageCircle size={18} className="text-yellow-400" />
+              <span className="text-white font-medium">Chat with Sreeni</span>
+            </div>
+          </div>
+          
+          <div className="h-64 overflow-y-auto p-4 space-y-3">
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[80%] p-3 rounded-2xl ${
+                  msg.sender === 'user' 
+                    ? 'bg-yellow-400 text-purple-900' 
+                    : 'bg-white/10 text-white'
+                }`}>
+                  <p className="text-sm">{msg.text}</p>
+                </div>
+              </div>
+            ))}
+            
+            {messages.length === 0 && (
+              <div className="text-center text-purple-300 text-sm py-8">
+                Ask Sreeni anything about slots, rewards, or the casino floor!
+              </div>
+            )}
+          </div>
+          
+          <div className="p-3 bg-white/5 border-t border-white/10">
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Ask Sreeni anything..."
+                className="flex-1 bg-white/10 border border-white/20 rounded-xl px-4 py-2 text-white placeholder-purple-300 text-sm"
+              />
+              <button
+                onClick={handleSendMessage}
+                className="bg-gradient-to-r from-yellow-400 to-orange-500 text-purple-900 font-bold px-4 py-2 rounded-xl"
+              >
+                Send
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
